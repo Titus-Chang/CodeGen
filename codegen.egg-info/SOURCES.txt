@@ -1,0 +1,7 @@
+README.md
+cli.py
+pyproject.toml
+codegen.egg-info/PKG-INFO
+codegen.egg-info/SOURCES.txt
+codegen.egg-info/dependency_links.txt
+codegen.egg-info/top_level.txt
