@@ -7,43 +7,38 @@ from datetime import datetime
 from typing import Dict, Any
 
 
-def build_report_dict(args: argparse.Namespace) -> Dict[str, Any]:
+def build_report() -> Dict[str, Any]:
+    """Create a minimal report. No external params required."""
     return {
-        "project_url": args.project_url,
-        "project_name": args.project_name,
-        "username": args.username,
-        "severity_level": args.severity_level,
         "generated_at": datetime.utcnow().isoformat() + "Z",
-        "summary": {
-            "files_scanned": 2,
-            "issues_found": 1,
-            "top_issues": [
-                {"id": "CG001", "severity": "Medium", "message": "Sample codegen issue"}
-            ],
-        },
+        "message": "Minimal CodeGen report",
+        "items": [
+            {"id": "item1", "note": "example"},
+        ],
     }
 
 
 def main(argv=None):
     """
-    Minimal CodeGen CLI main.
-    Can be called as a CLI or imported and called programmatically.
+    Minimal CodeGen CLI entrypoint.
+    - If called without args, writes to ./output/codegen_report.json by default.
+    - If called programmatically, you may pass argv list like:
+        main(["--output_path", "/tmp/out.json"])
     Exits with SystemExit(0) on success, SystemExit(1) on failure.
     """
     parser = argparse.ArgumentParser(prog="codegen")
-    parser.add_argument("--project_url", default="", help="Project base URL")
-    parser.add_argument("--project_name", default="", help="Project name")
-    parser.add_argument("--username", default="", help="Username")
-    parser.add_argument("--password", default="", help="Password (unused)")
-    parser.add_argument("--severity_level", default=5, type=int, help="Severity threshold")
-    parser.add_argument("--output_path", required=True, help="Path to write JSON output")
-
+    parser.add_argument(
+        "--output_path",
+        required=False,
+        default=str(Path.cwd() / "output" / "codegen_report.json"),
+        help="Path to write JSON output (default: ./output/codegen_report.json)",
+    )
     args = parser.parse_args(argv)
 
     out_path = Path(args.output_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    report = build_report_dict(args)
+    report = build_report()
 
     try:
         with open(out_path, "w", encoding="utf-8") as f:
@@ -52,5 +47,6 @@ def main(argv=None):
         print(f"❌ Failed to write output: {e}", file=sys.stderr)
         raise SystemExit(1)
 
-    print(f"✅ CodeGen wrote report to {out_path}")
+    # stdout message is optional; keep for debug
+    print(f"✅ CodeGen wrote report to {out_path}", file=sys.stdout)
     raise SystemExit(0)
